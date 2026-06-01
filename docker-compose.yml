@@ -1,0 +1,97 @@
+name: tree-hollow
+
+services:
+  mysql:
+    image: mysql:8.4
+    container_name: th-mysql
+    restart: unless-stopped
+    environment:
+      MYSQL_ALLOW_EMPTY_PASSWORD: "yes"
+      MYSQL_DATABASE: tree_hollow
+      MYSQL_CHARSET: utf8mb4
+      MYSQL_COLLATION: utf8mb4_unicode_ci
+      TZ: Asia/Shanghai
+    command:
+      - --character-set-server=utf8mb4
+      - --collation-server=utf8mb4_unicode_ci
+      - --default-authentication-plugin=mysql_native_password
+    volumes:
+      - mysql_data:/var/lib/mysql
+    ports:
+      - "3306:3306"
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "127.0.0.1", "-uroot"]
+      interval: 5s
+      timeout: 3s
+      retries: 20
+
+  redis:
+    image: redis:7-alpine
+    container_name: th-redis
+    restart: unless-stopped
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis_data:/data
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 5s
+      timeout: 3s
+      retries: 10
+
+  backend:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    container_name: th-backend
+    restart: unless-stopped
+    environment:
+      APP_NAME: TreeHollow
+      APP_ENV: prod
+      DATABASE_URL: mysql+pymysql://root:@mysql:3306/tree_hollow?charset=utf8mb4
+      REDIS_URL: redis://redis:6379/0
+      JWT_SECRET: ${JWT_SECRET:-tree-hollow-prod-secret-please-change}
+      JWT_ALG: HS256
+      JWT_EXPIRE_MINUTES: 10080
+      DEEPSEEK_API_KEY: ${DEEPSEEK_API_KEY:?请在 .env 中设置 DEEPSEEK_API_KEY}
+      DEEPSEEK_BASE_URL: https://api.deepseek.com
+      DEEPSEEK_MODEL: deepseek-chat
+      AI_CONTEXT_WINDOW: 20
+      AI_CACHE_FILE: /app/data/ai_cache.json
+      TZ: Asia/Shanghai
+    volumes:
+      - backend_data:/app/data
+    ports:
+      - "8000:8000"
+    depends_on:
+      mysql:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+
+  frontend-mobile:
+    build:
+      context: ./frontend-mobile
+      dockerfile: Dockerfile
+    container_name: th-mobile
+    restart: unless-stopped
+    ports:
+      - "5173:80"
+    depends_on:
+      - backend
+
+  frontend-admin:
+    build:
+      context: ./frontend-admin
+      dockerfile: Dockerfile
+    container_name: th-admin
+    restart: unless-stopped
+    ports:
+      - "5174:80"
+    depends_on:
+      - backend
+
+volumes:
+  mysql_data:
+  redis_data:
+  backend_data:
