@@ -1,0 +1,63 @@
+docs/Git操作指南.md
+  cabb546496c08b1a 1-237 gitai:{"mixed_line_ranges":[],"operations":[{"operation_id":"6a1dc42b96bf2bbf00d6e72e","tool_type":"agent","tool_id":"Write","line_ranges":[{"Range":[1,237]}]}]}
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.3.4",
+  "base_commit_sha": "a4c2de536a87a8eaf23b353cc6a693fef3584a22",
+  "prompts": {
+    "cabb546496c08b1a": {
+      "agent_id": {
+        "tool": "trae",
+        "id": "6a1d704296bf2bbf00d6e216",
+        "model": "Doubao-Seed-2.0-Code__dev"
+      },
+      "human_author": "EmptyCity-111 <3047874865@qq.com>",
+      "messages": [],
+      "total_additions": 237,
+      "total_deletions": 0,
+      "accepted_lines": 237,
+      "overriden_lines": 0
+    }
+  },
+  "attestation_metadata": {
+    "docs/Git操作指南.md": [
+      {
+        "hash": "cabb546496c08b1a",
+        "line_ranges": [
+          {
+            "Range": [
+              1,
+              237
+            ]
+          }
+        ],
+        "mixed_line_ranges": [],
+        "operations": [
+          {
+            "operation_id": "6a1dc42b96bf2bbf00d6e72e",
+            "tool_type": "agent",
+            "tool_id": "Write",
+            "line_ranges": [
+              {
+                "Range": [
+                  1,
+                  237
+                ]
+              }
+            ]
+          }
+        ]
+      }
+    ]
+  },
+  "remote_transcripts": {
+    "cabb546496c08b1a": {
+      "tool": "trae",
+      "conversation_id": "6a1d704296bf2bbf00d6e216",
+      "session_id": "6a1d704296bf2bbf00d6e216",
+      "status": "remote_only",
+      "message": "Remote transcript resolution is not implemented yet for TRAE prompts."
+    }
+  }
+}
