@@ -59,8 +59,8 @@
           <van-icon name="cross" @click="showKb = false" />
         </div>
 
-        <van-uploader :after-read="onUpload" :max-count="1" accept=".pdf,.docx,.txt,.md">
-          <van-button block type="primary" :loading="uploading">上传文件 (PDF/DOCX/TXT/MD)</van-button>
+        <van-uploader :after-read="onUpload" :max-count="1" accept=".pdf,.txt,.md">
+          <van-button block type="primary" :loading="uploading">上传文件 (PDF/TXT/MD)</van-button>
         </van-uploader>
         <div class="muted" style="margin-top:6px;">≤ 20MB · 上传后自动切片 + 向量化</div>
 
