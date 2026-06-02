@@ -12,7 +12,7 @@ from app.services import rag_service
 
 router = APIRouter(prefix="/knowledge", tags=["knowledge"])
 
-ALLOWED_EXT = (".pdf", ".docx", ".txt", ".md", ".markdown")
+ALLOWED_EXT = (".pdf", ".txt", ".md", ".markdown")
 MAX_BYTES = 20 * 1024 * 1024  # 20MB
 
 
