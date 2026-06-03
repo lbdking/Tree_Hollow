@@ -84,8 +84,8 @@ onMounted(loadCalendar)
 .emojis { display: grid; grid-template-columns: repeat(4,1fr); gap: 8px; margin-bottom: 14px; }
 .m { padding: 8px 0; text-align: center; border-radius: 12px; background: #f4f5fa; }
 .m.active { background: #ecedff; box-shadow: 0 0 0 2px #7c83ff inset; }
-.cal-grid { display: grid; grid-template-columns: repeat(7,1fr); gap: 4px; }
-.cell { aspect-ratio: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; border-radius: 8px; background: #f7f8fc; font-size: 12px; }
+.cal-grid { display: grid; grid-template-columns: repeat(7, minmax(40px, 1fr)); grid-auto-rows: 48px; gap: 4px; max-width: 100%; }
+.cell { display: flex; flex-direction: column; align-items: center; justify-content: center; border-radius: 8px; background: #f7f8fc; font-size: 12px; }
 .cell.empty { background: transparent; }
 .cell.today { background: #ecedff; box-shadow: 0 0 0 2px #7c83ff inset; }
 .cell .emoji { font-size: 18px; }
