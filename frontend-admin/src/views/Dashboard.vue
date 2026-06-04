@@ -19,7 +19,23 @@
       </el-col>
       <el-col :span="10">
         <el-card>
-          <h4 style="margin:0 0 12px;">心情分布</h4>
+          <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px;">
+            <h4 style="margin:0;">心情分布</h4>
+            <el-select 
+              v-model="selectedAgeGroup" 
+              placeholder="选择年龄段"
+              style="width: 140px;"
+              @change="loadMoodDistribution"
+            >
+              <el-option label="全部" value="all" />
+              <el-option 
+                v-for="age in ageGroups" 
+                :key="age.key" 
+                :label="age.group + ' (' + age.count + '人)'" 
+                :value="age.key" 
+              />
+            </el-select>
+          </div>
           <div ref="pieRef" style="height:280px;"></div>
         </el-card>
       </el-col>
@@ -28,13 +44,15 @@
 </template>
 
 <script setup>
-import { ref, onMounted, computed } from 'vue'
+import { ref, onMounted, computed, watch } from 'vue'
 import * as echarts from 'echarts'
 import { adminApi } from '../api'
 
-const data = ref({ summary: {}, posts_week: [], mood_distribution: [] })
+const data = ref({ summary: {}, posts_week: [], mood_distribution: [], age_groups: [] })
 const lineRef = ref(null)
 const pieRef = ref(null)
+const selectedAgeGroup = ref('all')
+const ageGroups = ref([])
 
 const cards = computed(() => {
   const s = data.value.summary
@@ -50,8 +68,8 @@ const cards = computed(() => {
   ]
 })
 
-onMounted(async () => {
-  data.value = await adminApi.dashboard()
+const initCharts = () => {
+  // 折线图
   const line = echarts.init(lineRef.value)
   line.setOption({
     tooltip: {},
@@ -59,16 +77,49 @@ onMounted(async () => {
     yAxis: { type: 'value' },
     series: [{ type: 'line', smooth: true, data: data.value.posts_week.map(p => p.count), areaStyle: {}, itemStyle: { color: '#7c83ff' } }]
   })
+
+  // 饼状图（显示百分比）
+  updatePieChart()
+}
+
+const updatePieChart = () => {
   const pie = echarts.init(pieRef.value)
   pie.setOption({
-    tooltip: { trigger: 'item' },
+    tooltip: { 
+      trigger: 'item',
+      formatter: '{b}: {c}次 ({d}%)'
+    },
     legend: { bottom: 0 },
     series: [{
       type: 'pie',
       radius: ['40%', '70%'],
-      data: data.value.mood_distribution.map(m => ({ name: m.mood, value: m.count }))
+      label: {
+        show: true,
+        formatter: '{b}\n{c}次 ({d}%)'
+      },
+      labelLine: {
+        show: true
+      },
+      data: data.value.mood_distribution.map(m => ({ 
+        name: m.mood, 
+        value: m.count,
+        percent: m.percentage 
+      }))
     }]
   })
+}
+
+const loadMoodDistribution = async () => {
+  const params = selectedAgeGroup.value === 'all' ? {} : { age_group: selectedAgeGroup.value }
+  data.value = await adminApi.dashboard(params)
+  ageGroups.value = data.value.age_groups || []
+  updatePieChart()
+}
+
+onMounted(async () => {
+  data.value = await adminApi.dashboard()
+  ageGroups.value = data.value.age_groups || []
+  initCharts()
 })
 </script>
 
