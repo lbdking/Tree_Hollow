@@ -35,6 +35,7 @@ class UserOut(BaseModel):
     id: int
     student_id: str
     real_name: str
+    age: Optional[int] = None
     role: str
     avatar: str
     bio: str
@@ -45,6 +46,8 @@ class UserOut(BaseModel):
 
 class UserUpdateIn(BaseModel):
     real_name: Optional[str] = None
+    age: Optional[int] = None
+    student_id: Optional[str] = None
     avatar: Optional[str] = None
     bio: Optional[str] = None
 

@@ -6,7 +6,7 @@ export const authApi = {
 }
 
 export const adminApi = {
-  dashboard: () => http.get('/admin/dashboard'),
+  dashboard: params => http.get('/admin/dashboard', { params }),
   users: params => http.get('/admin/users', { params }),
   setRole: (uid, role) => http.put(`/admin/users/${uid}/role`, null, { params: { role } }),
   reports: status => http.get('/admin/reports', { params: { status_filter: status } }),
