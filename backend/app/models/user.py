@@ -13,7 +13,6 @@ class User(Base):
     student_id: Mapped[str] = mapped_column(String(64), unique=True, index=True, comment="学号")
     password_hash: Mapped[str] = mapped_column(String(255))
     real_name: Mapped[str] = mapped_column(String(64), default="")
-    age: Mapped[int] = mapped_column(Integer, nullable=True, default=None, comment="年龄")
     role: Mapped[str] = mapped_column(String(16), default="student", comment="student/counselor/admin")
     avatar: Mapped[str] = mapped_column(String(255), default="")
     bio: Mapped[str] = mapped_column(String(255), default="")

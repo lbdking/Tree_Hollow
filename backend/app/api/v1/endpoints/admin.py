@@ -11,12 +11,11 @@ router = APIRouter(prefix="/admin", tags=["admin"])
 
 
 @router.get("/dashboard")
-def dashboard(age_group: str = None, db: Session = Depends(get_db), _: User = Depends(admin_required)):
+def dashboard(db: Session = Depends(get_db), _: User = Depends(admin_required)):
     return {
         "summary": crud.stats.stats.summary(db),
         "posts_week": crud.stats.stats.posts_in_recent_days(db, days=7),
-        "mood_distribution": crud.stats.stats.mood_distribution(db, age_group),
-        "age_groups": crud.stats.stats.get_age_groups(db),
+        "mood_distribution": crud.stats.stats.mood_distribution(db),
     }
 
 
