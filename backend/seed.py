@@ -71,7 +71,7 @@ def seed():
             Article(title="改善睡眠的科学方法", category="睡眠",
                     summary="掌握睡眠的黄金法则。",
                     content="保持规律作息，避免睡前蓝光，做几次深呼吸，让身心慢下来……",
-                    cover="https://images.unsplash.com/photo-1455642305367-68834a9d4337?w=800"),
+                    cover="https://images.unsplash.com/photo-1541781774459-bb2af2f05b55?w=800"),
             Article(title="一段冥想引导视频", category="冥想", content_type="video",
                     summary="跟随声音放松你的身心。",
                     video_url="https://www.w3schools.com/html/mov_bbb.mp4",
