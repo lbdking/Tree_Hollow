@@ -38,8 +38,15 @@ class CRUDStats:
         return [{"date": str(d), "count": c} for d, c in rows]
 
     def mood_distribution(self, db: Session) -> List[dict]:
-        rows = db.query(MoodRecord.mood, func.count().label("c")).group_by(MoodRecord.mood).all()
-        return [{"mood": m, "count": c} for m, c in rows]
+        # 使用 Python 层面分组，避免 emoji 字符编码问题
+        all_moods = db.query(MoodRecord.mood).all()
+        mood_counts = {}
+        for (mood,) in all_moods:
+            if mood in mood_counts:
+                mood_counts[mood] += 1
+            else:
+                mood_counts[mood] = 1
+        return [{"mood": m, "count": c} for m, c in mood_counts.items()]
 
 
 stats = CRUDStats()
