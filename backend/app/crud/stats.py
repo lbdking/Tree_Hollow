@@ -37,6 +37,154 @@ class CRUDStats:
         )
         return [{"date": str(d), "count": c} for d, c in rows]
 
+    def _get_period_range(self, period: str):
+        """获取周期对应的时间范围"""
+        now = datetime.utcnow()
+        if period == 'day':
+            # 最近30天
+            return now - timedelta(days=30), '%Y-%m-%d', 'day'
+        elif period == 'week':
+            # 最近12周
+            return now - timedelta(weeks=12), '%Y-%m-%d', 'week'
+        elif period == 'month':
+            # 最近12个月
+            return now - timedelta(days=365), '%Y-%m', 'month'
+        else:
+            return now - timedelta(days=30), '%Y-%m-%d', 'day'
+
+    def _format_period(self, dt, period: str):
+        """根据周期格式化日期"""
+        # 处理可能的类型转换问题
+        if hasattr(dt, 'date'):
+            dt = dt.date()
+        elif isinstance(dt, str):
+            dt = datetime.strptime(dt, '%Y-%m-%d').date()
+        
+        if period == 'day':
+            return dt.strftime('%Y-%m-%d')
+        elif period == 'week':
+            # 返回周起始日期（周一）
+            monday = dt - timedelta(days=dt.weekday())
+            return monday.strftime('%Y-%m-%d')
+        elif period == 'month':
+            return dt.strftime('%Y-%m')
+        return dt.strftime('%Y-%m-%d')
+
+    def get_posts_trend(self, db: Session, period: str = 'day') -> List[dict]:
+        """
+        获取发帖趋势
+        :param period: day/week/month
+        """
+        since, fmt, _ = self._get_period_range(period)
+        if period == 'week':
+            # MySQL 按周统计，使用 YEARWEEK
+            rows = (
+                db.query(
+                    func.yearweek(HollowPost.created_at).label("week_num"),
+                    func.count().label("c")
+                )
+                .filter(HollowPost.created_at >= since)
+                .group_by("week_num")
+                .order_by("week_num")
+                .all()
+            )
+            result = []
+            for week_num, c in rows:
+                # 将 YEARWEEK 格式转换为日期格式
+                year = int(str(week_num)[:4])
+                week = int(str(week_num)[4:])
+                # 计算该周的周一日期
+                first_day = datetime(year, 1, 1)
+                if first_day.weekday() > 0:
+                    first_day = first_day + timedelta(days=7 - first_day.weekday())
+                else:
+                    first_day = first_day - timedelta(days=first_day.weekday())
+                monday = first_day + timedelta(weeks=week - 1)
+                result.append({"date": monday.strftime('%Y-%m-%d'), "count": c})
+            return result
+        elif period == 'month':
+            # MySQL 按月统计
+            rows = (
+                db.query(
+                    func.date_format(HollowPost.created_at, '%Y-%m').label("month_str"),
+                    func.count().label("c")
+                )
+                .filter(HollowPost.created_at >= since)
+                .group_by("month_str")
+                .order_by("month_str")
+                .all()
+            )
+            result = []
+            for month_str, c in rows:
+                result.append({"date": month_str, "count": c})
+            return result
+        else:
+            # 按日统计
+            rows = (
+                db.query(func.date(HollowPost.created_at).label("d"), func.count().label("c"))
+                .filter(HollowPost.created_at >= since)
+                .group_by("d")
+                .order_by("d")
+                .all()
+            )
+            return [{"date": str(d), "count": c} for d, c in rows]
+
+    def get_users_trend(self, db: Session, period: str = 'day') -> List[dict]:
+        """
+        获取用户注册增长趋势
+        :param period: day/week/month
+        """
+        since, fmt, _ = self._get_period_range(period)
+        if period == 'week':
+            # MySQL 按周统计
+            rows = (
+                db.query(
+                    func.yearweek(User.created_at).label("week_num"),
+                    func.count().label("c")
+                )
+                .filter(User.created_at >= since, User.is_deleted == False)
+                .group_by("week_num")
+                .order_by("week_num")
+                .all()
+            )
+            result = []
+            for week_num, c in rows:
+                year = int(str(week_num)[:4])
+                week = int(str(week_num)[4:])
+                first_day = datetime(year, 1, 1)
+                if first_day.weekday() > 0:
+                    first_day = first_day + timedelta(days=7 - first_day.weekday())
+                else:
+                    first_day = first_day - timedelta(days=first_day.weekday())
+                monday = first_day + timedelta(weeks=week - 1)
+                result.append({"date": monday.strftime('%Y-%m-%d'), "count": c})
+            return result
+        elif period == 'month':
+            # MySQL 按月统计
+            rows = (
+                db.query(
+                    func.date_format(User.created_at, '%Y-%m').label("month_str"),
+                    func.count().label("c")
+                )
+                .filter(User.created_at >= since, User.is_deleted == False)
+                .group_by("month_str")
+                .order_by("month_str")
+                .all()
+            )
+            result = []
+            for month_str, c in rows:
+                result.append({"date": month_str, "count": c})
+            return result
+        else:
+            rows = (
+                db.query(func.date(User.created_at).label("d"), func.count().label("c"))
+                .filter(User.created_at >= since, User.is_deleted == False)
+                .group_by("d")
+                .order_by("d")
+                .all()
+            )
+            return [{"date": str(d), "count": c} for d, c in rows]
+
     def mood_distribution(self, db: Session, age_group: str = None) -> List[dict]:
         """
         获取心情分布，支持按年龄段筛选

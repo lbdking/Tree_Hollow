@@ -11,10 +11,15 @@ router = APIRouter(prefix="/admin", tags=["admin"])
 
 
 @router.get("/dashboard")
-def dashboard(age_group: str = None, db: Session = Depends(get_db), _: User = Depends(admin_required)):
+def dashboard(age_group: str = None, posts_period: str = 'day', users_period: str = 'day', db: Session = Depends(get_db), _: User = Depends(admin_required)):
+    if posts_period not in ('day', 'week', 'month'):
+        posts_period = 'day'
+    if users_period not in ('day', 'week', 'month'):
+        users_period = 'day'
     return {
         "summary": crud.stats.stats.summary(db),
-        "posts_week": crud.stats.stats.posts_in_recent_days(db, days=7),
+        "posts_trend": crud.stats.stats.get_posts_trend(db, posts_period),
+        "users_trend": crud.stats.stats.get_users_trend(db, users_period),
         "mood_distribution": crud.stats.stats.mood_distribution(db, age_group),
         "age_groups": crud.stats.stats.get_age_groups(db),
     }
@@ -121,4 +126,50 @@ def admin_set_post_status(pid: int, status_v: str, db: Session = Depends(get_db)
     if status_v not in ("published", "hidden", "deleted"):
         raise HTTPException(400, "非法状态")
     crud.hollow.hollow_post.set_status(db, p, status_v)
+    return {"ok": True}
+
+
+@router.get("/posts/{pid}/detail")
+def get_post_detail(pid: int, db: Session = Depends(get_db), _: User = Depends(admin_required)):
+    p = crud.hollow.hollow_post.get(db, pid)
+    if not p:
+        raise HTTPException(404, "帖子不存在")
+    replies = crud.hollow.hollow_reply.list_by_post(db, pid)
+    user = crud.user.user.get(db, p.user_id)
+    return {
+        "id": p.id,
+        "user_id": p.user_id,
+        "student_id": user.student_id if user else "",
+        "real_name": user.real_name if user else "",
+        "content": p.content,
+        "mood_tag": p.mood_tag,
+        "is_anonymous": p.is_anonymous,
+        "is_crisis": p.is_crisis,
+        "like_count": p.like_count,
+        "reply_count": p.reply_count,
+        "status": p.status,
+        "created_at": p.created_at,
+        "replies": [
+            {
+                "id": r.id,
+                "user_id": r.user_id,
+                "content": r.content,
+                "is_anonymous": r.is_anonymous,
+                "like_count": r.like_count,
+                "status": r.status,
+                "created_at": r.created_at,
+            }
+            for r in replies
+        ],
+    }
+
+
+@router.put("/replies/{rid}/status")
+def admin_set_reply_status(rid: int, status_v: str, db: Session = Depends(get_db), _: User = Depends(admin_required)):
+    r = crud.hollow.hollow_reply.get(db, rid)
+    if not r:
+        raise HTTPException(404, "评论不存在")
+    if status_v not in ("published", "hidden", "deleted"):
+        raise HTTPException(400, "非法状态")
+    crud.hollow.hollow_reply.set_status(db, r, status_v)
     return {"ok": True}

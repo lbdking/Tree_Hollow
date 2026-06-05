@@ -12,7 +12,9 @@ export const adminApi = {
   reports: status => http.get('/admin/reports', { params: { status_filter: status } }),
   handleReport: (rid, action) => http.post(`/admin/reports/${rid}/handle`, null, { params: { action } }),
   posts: params => http.get('/admin/posts', { params }),
-  setPostStatus: (pid, status_v) => http.put(`/admin/posts/${pid}/status`, null, { params: { status_v } })
+  setPostStatus: (pid, status_v) => http.put(`/admin/posts/${pid}/status`, null, { params: { status_v } }),
+  postDetail: pid => http.get(`/admin/posts/${pid}/detail`),
+  setReplyStatus: (rid, status_v) => http.put(`/admin/replies/${rid}/status`, null, { params: { status_v } })
 }
 
 export const articleApi = {
