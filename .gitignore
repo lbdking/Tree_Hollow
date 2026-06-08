@@ -1,0 +1,35 @@
+# ===== Python =====
+backend/.venv/
+**/__pycache__/
+*.pyc
+*.pyo
+
+# ===== Node =====
+**/node_modules/
+**/dist/
+**/.vite/
+*.log
+npm-debug.log*
+
+# ===== 运行时数据 =====
+backend/data/
+backend/*.log
+/tmp/
+
+# ===== 系统/IDE =====
+.DS_Store
+.idea/
+.vscode/
+*.swp
+*.swo
+
+# ===== 部署产物 =====
+*.tar
+*.tar.gz
+deploy/*.tar
+deploy/*.tar.gz
+/tree-hollow-images/
+
+# ===== 本地环境（保留 .env 的占位模板版本，本地 override 用 .env.local）=====
+.env.local
+backend/.env.local
