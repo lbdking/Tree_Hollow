@@ -40,6 +40,7 @@ def _post_to_out(db: Session, p: HollowPost, current_user: User) -> HollowPostOu
     )
 
 
+# ========== 【顾传耀负责】帖子列表查询：分页 + 情绪标签筛选 + 关键词搜索 ==========
 @router.get("/posts")
 def list_posts(
     page: int = 1,
@@ -55,6 +56,7 @@ def list_posts(
     return {"total": total, "items": [_post_to_out(db, p, user) for p in items]}
 
 
+# ========== 【顾传耀负责】发布帖子接口：危机检测 + 匿名身份 + 自动推送援助通知（核心亮点）==========
 @router.post("/posts", response_model=HollowPostOut)
 def create_post(payload: HollowPostIn, db: Session = Depends(get_db), user: User = Depends(get_current_user)):
     is_crisis = detect_crisis(payload.content)
@@ -121,6 +123,7 @@ def list_replies(post_id: int, db: Session = Depends(get_db), user: User = Depen
     return {"items": out}
 
 
+# ========== 【顾传耀负责】发布评论接口：多级回复(parent_id) + 匿名身份 + 评论计数更新 ==========
 @router.post("/posts/{post_id}/replies", response_model=HollowReplyOut)
 def create_reply(
     post_id: int,
@@ -168,6 +171,7 @@ def create_reply(
     )
 
 
+# ========== 【顾传耀负责】点赞/取消点赞接口：查询记录 + 增删操作 + 计数同步更新 ==========
 @router.post("/like")
 def toggle_like(
     target_type: str,
@@ -198,6 +202,7 @@ def toggle_like(
     return {"liked": delta == 1, "delta": delta}
 
 
+# ========== 【顾传耀负责】举报接口：记录举报人 + 目标类型 + 原因，管理员后台处理 ==========
 @router.post("/report")
 def report_target(payload: ReportIn, db: Session = Depends(get_db), user: User = Depends(get_current_user)):
     crud.hollow.report.create(

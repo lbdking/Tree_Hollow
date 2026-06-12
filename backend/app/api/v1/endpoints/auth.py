@@ -11,6 +11,7 @@ from app.schemas import LoginIn, RegisterIn, TokenOut, UserOut, UserUpdateIn
 router = APIRouter(prefix="/auth", tags=["auth"])
 
 
+# ========== 【顾传耀负责】用户注册接口：学号校验 + 密码BCrypt加密 + JWT生成 ==========
 @router.post("/register", response_model=TokenOut)
 def register(payload: RegisterIn, db: Session = Depends(get_db)):
     if crud.user.user.get_by_student_id(db, payload.student_id):
@@ -28,6 +29,7 @@ def register(payload: RegisterIn, db: Session = Depends(get_db)):
     return TokenOut(access_token=token, user=UserOut.model_validate(u))
 
 
+# ========== 【顾传耀负责】用户登录接口：学号查询 + 密码验证 + JWT返回 ==========
 @router.post("/login", response_model=TokenOut)
 def login(payload: LoginIn, db: Session = Depends(get_db)):
     u = crud.user.user.get_by_student_id(db, payload.student_id)

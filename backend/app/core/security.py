@@ -7,11 +7,13 @@ from jose import JWTError, jwt
 from app.core.config import settings
 
 
+# ========== 【顾传耀负责】密码加密：BCrypt哈希 + 自动加盐，明文永不落地 ==========
 def hash_password(plain: str) -> str:
     pw = plain.encode("utf-8")[:72]
     return bcrypt.hashpw(pw, bcrypt.gensalt()).decode("utf-8")
 
 
+# ========== 【顾传耀负责】密码验证：比对用户输入与数据库哈希值 ==========
 def verify_password(plain: str, hashed: str) -> bool:
     try:
         return bcrypt.checkpw(plain.encode("utf-8")[:72], hashed.encode("utf-8"))
@@ -19,6 +21,7 @@ def verify_password(plain: str, hashed: str) -> bool:
         return False
 
 
+# ========== 【顾传耀负责】JWT令牌生成：用户ID + 角色 + 过期时间，无状态认证 ==========
 def create_access_token(subject: str, role: str, expires_minutes: Optional[int] = None) -> str:
     expire = datetime.utcnow() + timedelta(minutes=expires_minutes or settings.JWT_EXPIRE_MINUTES)
     to_encode = {"sub": subject, "role": role, "exp": expire}

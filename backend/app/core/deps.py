@@ -12,6 +12,7 @@ from app.models.user import User
 oauth2_scheme = OAuth2PasswordBearer(tokenUrl="/api/v1/auth/login", auto_error=False)
 
 
+# ========== 【顾传耀负责】身份验证依赖：解析JWT + 查询用户 + 校验状态，所有接口通用 ==========
 def get_current_user(
     token: Optional[str] = Depends(oauth2_scheme),
     db: Session = Depends(get_db),
@@ -27,6 +28,7 @@ def get_current_user(
     return user
 
 
+# ========== 【顾传耀负责】角色权限校验：检查用户角色是否在允许列表中 ==========
 def require_roles(*roles: str):
     def _checker(user: User = Depends(get_current_user)) -> User:
         if user.role not in roles:

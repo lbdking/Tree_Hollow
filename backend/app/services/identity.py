@@ -6,6 +6,7 @@ from app import crud
 from app.models.user import User
 
 
+# ========== 【顾传耀负责】匿名身份生成：匿名时返回随机昵称+虚拟头像，同一帖子内身份一致 ==========
 def get_display_identity(db: Session, user_id: int, post_id: int, is_anonymous: bool):
     """返回 (nickname, avatar)。匿名时返回楼内一致的随机昵称。"""
     u = crud.user.user.get(db, user_id)
